@@ -500,27 +500,24 @@ func writePixelData(w dicomio.Writer, t tag.Tag, value Value, vr string, vl uint
 		}
 	} else {
 		numFrames := len(image.Frames)
-		numPixels := len(image.Frames[0].NativeData.Data)
-		numValues := len(image.Frames[0].NativeData.Data[0])
-		length := numFrames * numPixels * numValues * image.Frames[0].NativeData.BitsPerSample / 8 // length in bytes
+		length := len(image.Frames[0].NativeData.Data) * image.Frames[0].NativeData.BitsPerSample / 8 // length in bytes
 
 		buf := new(bytes.Buffer)
 		buf.Grow(length)
 		for frame := 0; frame < numFrames; frame++ {
-			for pixel := 0; pixel < numPixels; pixel++ {
-				for value := 0; value < numValues; value++ {
-					if image.Frames[frame].NativeData.BitsPerSample == 8 {
-						if err := binary.Write(buf, binary.LittleEndian, uint8(image.Frames[frame].NativeData.Data[pixel][value])); err != nil {
-							return err
-						}
-					} else if image.Frames[frame].NativeData.BitsPerSample == 16 {
-						if err := binary.Write(buf, binary.LittleEndian, uint16(image.Frames[frame].NativeData.Data[pixel][value])); err != nil {
-							return err
-						}
-					} else {
-						return ErrorUnsupportedBitsPerSample
+			for pixel := range image.Frames[0].NativeData.Data {
+				if image.Frames[frame].NativeData.BitsPerSample == 8 {
+					if err := binary.Write(buf, binary.LittleEndian, uint8(image.Frames[frame].NativeData.Data[pixel])); err != nil {
+						return err
 					}
+				} else if image.Frames[frame].NativeData.BitsPerSample == 16 {
+					if err := binary.Write(buf, binary.LittleEndian, uint16(image.Frames[frame].NativeData.Data[pixel])); err != nil {
+						return err
+					}
+				} else {
+					return ErrorUnsupportedBitsPerSample
 				}
+
 			}
 		}
 		if err := w.WriteBytes(buf.Bytes()); err != nil {

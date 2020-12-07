@@ -221,33 +221,31 @@ func readNativeFrames(d dicomio.Reader, parsedData *Dataset, fc chan<- *frame.Fr
 				BitsPerSample: bitsAllocated,
 				Rows:          MustGetInts(rows.Value)[0],
 				Cols:          MustGetInts(cols.Value)[0],
-				Data:          make([][]int, int(pixelsPerFrame)),
+				Data:          make([]int, pixelsPerFrame*samplesPerPixel),
 			},
 		}
-		for pixel := 0; pixel < int(pixelsPerFrame); pixel++ {
-			currentPixel := make([]int, samplesPerPixel)
-			for value := 0; value < samplesPerPixel; value++ {
-				if bitsAllocated == 8 {
-					val, err := d.ReadUInt8()
-					if err != nil {
-						return nil, bytesRead, errors.New("")
-					}
-					currentPixel[value] = int(val)
-				} else if bitsAllocated == 16 {
-					val, err := d.ReadUInt16()
-					if err != nil {
-						return nil, bytesRead, errors.New("")
-					}
-					currentPixel[value] = int(val)
-				} else if bitsAllocated == 32 {
-					val, err := d.ReadUInt32()
-					if err != nil {
-						return nil, bytesRead, errors.New("")
-					}
-					currentPixel[value] = int(val)
+		for pixel := 0; pixel < pixelsPerFrame*samplesPerPixel; pixel++ {
+
+			if bitsAllocated == 8 {
+				val, err := d.ReadUInt8()
+				if err != nil {
+					return nil, bytesRead, errors.New("")
 				}
+				currentFrame.NativeData.Data[pixel] = int(val)
+			} else if bitsAllocated == 16 {
+				val, err := d.ReadUInt16()
+				if err != nil {
+					return nil, bytesRead, errors.New("")
+				}
+				currentFrame.NativeData.Data[pixel] = int(val)
+			} else if bitsAllocated == 32 {
+				val, err := d.ReadUInt32()
+				if err != nil {
+					return nil, bytesRead, errors.New("")
+				}
+				currentFrame.NativeData.Data[pixel] = int(val)
 			}
-			currentFrame.NativeData.Data[pixel] = currentPixel
+
 		}
 		image.Frames[frameIdx] = currentFrame
 		if fc != nil {

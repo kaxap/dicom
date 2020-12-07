@@ -8,7 +8,7 @@ import (
 // NativeFrame represents a native image frame
 type NativeFrame struct {
 	// Data is a slice of pixels, where each pixel can have multiple values
-	Data          [][]int
+	Data          []int
 	Rows          int
 	Cols          int
 	BitsPerSample int
@@ -34,8 +34,9 @@ func (n *NativeFrame) GetEncapsulatedFrame() (*EncapsulatedFrame, error) {
 // autoscale pixel values or use window width or level info.
 func (n *NativeFrame) GetImage() (image.Image, error) {
 	i := image.NewGray16(image.Rect(0, 0, n.Cols, n.Rows))
-	for j := 0; j < len(n.Data); j++ {
-		i.SetGray16(j%n.Cols, j/n.Rows, color.Gray16{Y: uint16(n.Data[j][0])}) // for now, assume we're not overflowing uint16, assume gray image
+	step := len(n.Data) / n.Rows / n.Cols
+	for j := 0; j < len(n.Data); j += step {
+		i.SetGray16(j%n.Cols, j/n.Rows, color.Gray16{Y: uint16(n.Data[j])}) // for now, assume we're not overflowing uint16, assume gray image
 	}
 	return i, nil
 }
