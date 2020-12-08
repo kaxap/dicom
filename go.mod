@@ -1,6 +1,6 @@
 module github.com/kaxap/dicom
 
-go 1.13
+go 1.14
 
 require (
 	github.com/golang/mock v1.4.4
