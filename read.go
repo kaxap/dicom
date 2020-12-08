@@ -224,6 +224,8 @@ func readNativeFrames(d dicomio.Reader, parsedData *Dataset, fc chan<- *frame.Fr
 				Data:          make([]int, pixelsPerFrame*samplesPerPixel),
 			},
 		}
+
+		buf := make([]byte, 2)
 		for pixel := 0; pixel < pixelsPerFrame*samplesPerPixel; pixel++ {
 
 			if bitsAllocated == 8 {
@@ -233,11 +235,14 @@ func readNativeFrames(d dicomio.Reader, parsedData *Dataset, fc chan<- *frame.Fr
 				}
 				currentFrame.NativeData.Data[pixel] = int(val)
 			} else if bitsAllocated == 16 {
-				val, err := d.ReadUInt16()
-				if err != nil {
-					return nil, bytesRead, errors.New("")
+				n, err := d.Read(buf)
+				if n < bitsAllocated/8 {
+					return nil, bytesRead, errors.New("not enough bytes in the input to read uint16")
 				}
-				currentFrame.NativeData.Data[pixel] = int(val)
+				if err != nil {
+					return nil, bytesRead, fmt.Errorf("could not read uint16 from input: %w", err)
+				}
+				currentFrame.NativeData.Data[pixel] = int(buf[0])<<8 | int(buf[1])
 			} else if bitsAllocated == 32 {
 				val, err := d.ReadUInt32()
 				if err != nil {
