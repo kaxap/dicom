@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/suyashkumar/dicom/pkg/tag"
+	"github.com/kaxap/dicom/pkg/tag"
 
-	"github.com/suyashkumar/dicom/pkg/frame"
+	"github.com/kaxap/dicom/pkg/frame"
 
-	"github.com/suyashkumar/dicom"
+	"github.com/kaxap/dicom"
 )
 
 // TestParse is an end-to-end sanity check over DICOMs in testfiles/. Currently it only checks that no error is returned

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/suyashkumar/dicom/pkg/uid"
+	"github.com/kaxap/dicom/pkg/uid"
 
-	"github.com/suyashkumar/dicom/pkg/dicomio"
-	"github.com/suyashkumar/dicom/pkg/tag"
+	"github.com/kaxap/dicom/pkg/dicomio"
+	"github.com/kaxap/dicom/pkg/tag"
 )
 
 var (

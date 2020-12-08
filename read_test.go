@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/suyashkumar/dicom/pkg/dicomio"
+	"github.com/kaxap/dicom/pkg/dicomio"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
-	mock_dicomio "github.com/suyashkumar/dicom/mocks/pkg/dicomio"
-	"github.com/suyashkumar/dicom/pkg/tag"
+	mock_dicomio "github.com/kaxap/dicom/mocks/pkg/dicomio"
+	"github.com/kaxap/dicom/pkg/tag"
 )
 
 func TestReadTag(t *testing.T) {
