@@ -225,33 +225,27 @@ func readNativeFrames(d dicomio.Reader, parsedData *Dataset, fc chan<- *frame.Fr
 			},
 		}
 
-		buf := make([]byte, 2)
+		// no zero cost abstractions come to mind, implement read op separately for 8, 16 and 32 bits
+		buf := make([]byte, bitsAllocated/8)
+		bo := d.GetByteOrder()
 		for pixel := 0; pixel < pixelsPerFrame*samplesPerPixel; pixel++ {
-
-			if bitsAllocated == 8 {
-				val, err := d.ReadUInt8()
-				if err != nil {
-					return nil, bytesRead, errors.New("")
-				}
-				currentFrame.NativeData.Data[pixel] = int(val)
-			} else if bitsAllocated == 16 {
-				n, err := d.Read(buf)
-				if n < bitsAllocated/8 {
-					return nil, bytesRead, errors.New("not enough bytes in the input to read uint16")
-				}
-				if err != nil {
-					return nil, bytesRead, fmt.Errorf("could not read uint16 from input: %w", err)
-				}
-				currentFrame.NativeData.Data[pixel] = int(buf[0])<<8 | int(buf[1])
-			} else if bitsAllocated == 32 {
-				val, err := d.ReadUInt32()
-				if err != nil {
-					return nil, bytesRead, errors.New("")
-				}
-				currentFrame.NativeData.Data[pixel] = int(val)
+			n, err := d.Read(buf)
+			if err != nil {
+				return nil, bytesRead, fmt.Errorf("could not read uint%d from input: %w", bitsAllocated, err)
 			}
-
+			if n < bitsAllocated/8 {
+				return nil, bytesRead, errors.New("not enough bytes in the input to read uint16")
+			}
+			switch bitsAllocated {
+			case 8:
+				currentFrame.NativeData.Data[pixel] = int(buf[0])
+			case 16:
+				currentFrame.NativeData.Data[pixel] = int(bo.Uint16(buf))
+			case 32:
+				currentFrame.NativeData.Data[pixel] = int(bo.Uint32(buf))
+			}
 		}
+
 		image.Frames[frameIdx] = currentFrame
 		if fc != nil {
 			fc <- &currentFrame // write the current frame to the frame channel

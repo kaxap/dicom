@@ -67,6 +67,8 @@ type Reader interface {
 	// SetCodingSystem sets the charset.CodingSystem to be used when ReadString
 	// is called.
 	SetCodingSystem(cs charset.CodingSystem)
+	// GetByteOrder returns currently set byte order used in this Reader
+	GetByteOrder() binary.ByteOrder
 }
 
 type reader struct {
@@ -229,6 +231,10 @@ func (r *reader) IsImplicit() bool { return r.implicit }
 
 func (r *reader) SetCodingSystem(cs charset.CodingSystem) {
 	r.cs = cs
+}
+
+func (r *reader) GetByteOrder() binary.ByteOrder {
+	return r.bo
 }
 
 func (r *reader) Peek(n int) ([]byte, error) {
