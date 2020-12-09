@@ -81,7 +81,12 @@ func ParseFile(filepath string, frameChan chan *frame.Frame) (Dataset, error) {
 	if err != nil {
 		return Dataset{}, err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Printf("could not close file %s, error: %s", filepath, err)
+		}
+	}()
 
 	info, err := f.Stat()
 	if err != nil {

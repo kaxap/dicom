@@ -170,9 +170,7 @@ func writeFileHeader(w dicomio.Writer, ds *Dataset, metaElems []*Element, opts w
 	if err != nil {
 		return err
 	}
-	w.WriteBytes(metaBytes.Bytes())
-
-	return nil
+	return w.WriteBytes(metaBytes.Bytes())
 }
 
 func writeElement(w dicomio.Writer, elem *Element, opts writeOptSet) error {
@@ -214,7 +212,7 @@ func writeElement(w dicomio.Writer, elem *Element, opts writeOptSet) error {
 
 	if elem.Value != nil {
 		// Write the bytes to the original writer
-		w.WriteBytes(valueData.Bytes())
+		return w.WriteBytes(valueData.Bytes())
 	}
 	return nil
 }
@@ -343,8 +341,7 @@ func writeRawItem(w dicomio.Writer, data []byte) error {
 	if err := writeVRVL(w, tag.Item, "NA", length); err != nil {
 		return err
 	}
-	w.WriteBytes(data)
-	return nil
+	return w.WriteBytes(data)
 }
 
 func writeBasicOffsetTable(w dicomio.Writer, offsets []uint32) error {
