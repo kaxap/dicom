@@ -9,6 +9,8 @@ import (
 type NativeFrame struct {
 	// Data is a slice of pixels, where each pixel can have multiple values
 	Data          []int
+	Max           int
+	Min           int
 	Rows          int
 	Cols          int
 	BitsPerSample int
@@ -35,8 +37,22 @@ func (n *NativeFrame) GetEncapsulatedFrame() (*EncapsulatedFrame, error) {
 func (n *NativeFrame) GetImage() (image.Image, error) {
 	i := image.NewGray16(image.Rect(0, 0, n.Cols, n.Rows))
 	step := len(n.Data) / n.Rows / n.Cols
+
+	max := n.Data[0]
+	min := n.Data[0]
+	// get min and max for normalization
+	for j := step; j < len(n.Data); j += step {
+		if n.Data[j] > max {
+			max = n.Data[j]
+		}
+		if n.Data[j] < min {
+			min = n.Data[j]
+		}
+	}
+
 	for j := 0; j < len(n.Data); j += step {
-		i.SetGray16(j%n.Cols, j/n.Rows, color.Gray16{Y: uint16(n.Data[j])}) // for now, assume we're not overflowing uint16, assume gray image
+		i.SetGray16(j%n.Cols, j/n.Rows,
+			color.Gray16{Y: uint16(0xFFFF * (1 - float64(n.Data[j]-min)/float64(max-min)))}) // for now, assume we're not overflowing uint16, assume gray image
 	}
 	return i, nil
 }
